@@ -1,0 +1,59 @@
+#Codigo en lenguaje Python
+#Librerias instaladas numpy, matplotlib y scipy
+#En la ventana CMD ejecutar: "pip install numpy" , "pip install matplotlib" y "pip install scipy"
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import CubicSpline
+
+#Datos
+x = np.array([2, 3, 4])
+y = np.array([5, 10, 6])
+
+#Construccion del spline cúbico
+spline = CubicSpline(x, y, bc_type='natural')
+
+#Intervalos para cada tramo
+x0 = np.linspace(2, 3, 200)
+x1 = np.linspace(3, 4, 200)
+
+#Grafica de cada spline
+plt.figure(figsize=(12,7))
+
+plt.plot(
+    x0,
+    spline(x0),
+    color='blue',
+    linewidth=2,
+    label=r'$S_0(x)=5+7.25(x-2)-2.25(x-2)^3$'
+)
+
+plt.plot(
+    x1,
+    spline(x1),
+    color='red',
+    linewidth=2,
+    label=r'$S_1(x)=10+0.5(x-3)-6.75(x-3)^2+2.25(x-3)^3$'
+)
+
+#Puntos originales
+plt.scatter(
+    x,
+    y,
+    color='black',
+    s=70,
+    zorder=5,
+    label='Datos originales'
+)
+
+#Etiquetas de puntos
+for xi, yi in zip(x, y):
+    plt.text(xi, yi -0.2, f'({xi},{yi})', fontsize=9)
+
+plt.title('Interpolación por Splines Cúbicos')
+plt.xlabel('x')
+plt.ylabel('y')
+
+plt.grid(True)
+plt.legend(fontsize=8)
+
+plt.show()
