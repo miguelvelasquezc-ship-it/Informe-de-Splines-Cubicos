@@ -1,0 +1,103 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import CubicSpline
+
+# =========================
+# DATOS
+# =========================
+
+f = np.array([
+    100,120,145,170,200,235,270,310,355,405,
+    460,520,585,655,730,810,895,985,1080,1180,
+    1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
+], dtype=float)
+
+Z = np.array([
+    152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
+    132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
+    135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
+], dtype=float)
+
+# =========================
+# SPLINE CÚBICO NATURAL
+# =========================
+
+spline = CubicSpline(f, Z, bc_type='natural')
+
+# =========================
+# DERIVADA DEL SPLINE
+# =========================
+
+# Derivada analítica del spline
+spline_derivada = spline.derivative()
+
+# Evaluar derivada en los puntos originales
+dZ_df = spline_derivada(f)
+
+# =========================
+# MALLA FINA
+# =========================
+
+x = np.linspace(min(f), max(f), 2000)
+
+y_derivada = spline_derivada(x)
+
+# =========================
+# UBICACIÓN DEL MÍNIMO
+# =========================
+
+# Raíces de la derivada
+raices = spline_derivada.roots()
+
+# Elegir raíz dentro del intervalo
+raices_validas = raices[
+    (raices >= min(f)) & (raices <= max(f))
+]
+
+# Frecuencia del mínimo
+f_min = raices_validas[0]
+
+# Valor mínimo
+Z_min = spline(f_min)
+
+# =========================
+# GRÁFICA
+# =========================
+
+plt.figure(figsize=(10,6))
+
+plt.plot(x, y_derivada,
+         linewidth=2,
+         label=r'$\frac{d|Z|}{df}$')
+
+plt.axhline(0,
+            color='black',
+            linestyle='--')
+
+plt.axvline(f_min,
+            color='red',
+            linestyle='--',
+            label=f'Mínimo ≈ {f_min:.4f} Hz')
+
+plt.scatter(f, dZ_df,
+            color='red',
+            zorder=3,
+            label='Derivada en datos')
+
+plt.xlabel('Frecuencia (Hz)')
+plt.ylabel(r'$\frac{d|Z|}{df}$')
+
+plt.title('Derivada del spline cúbico natural')
+
+plt.grid(True)
+plt.legend()
+
+plt.show()
+
+# =========================
+# RESULTADOS
+# =========================
+
+print(f"Frecuencia aproximada del mínimo = {f_min:.4f} Hz")
+
+print(f"Valor mínimo aproximado de |Z| = {Z_min:.4f} ohm")
