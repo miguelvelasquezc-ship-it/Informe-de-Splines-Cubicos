@@ -1,0 +1,131 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# =========================
+# DATOS
+# =========================
+
+f = np.array([
+    100,120,145,170,200,235,270,310,355,405,
+    460,520,585,655,730,810,895,985,1080,1180,
+    1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
+], dtype=float)
+
+Z = np.array([
+    152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
+    132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
+    135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
+], dtype=float)
+
+# =========================
+# POLINOMIO GRADO 10
+# =========================
+
+grado = 10
+
+coef = np.polyfit(f, Z, grado)
+
+p = np.poly1d(coef)
+
+# =========================
+# INTERPOLACIÓN EN 1000 Hz
+# =========================
+
+f_interp = 1000
+
+Z_interp = p(f_interp)
+
+print(f"\nValor interpolado en 1000 Hz = {Z_interp:.4f} ohm")
+
+# =========================
+# VALIDACIÓN LOO
+# =========================
+
+np.random.seed(1)
+
+indices_loo = np.random.choice(len(f), 5, replace=False)
+
+resultados = []
+
+for idx in indices_loo:
+
+    # Eliminar punto
+    f_train = np.delete(f, idx)
+    Z_train = np.delete(Z, idx)
+
+    # Nuevo polinomio
+    coef_loo = np.polyfit(f_train, Z_train, grado)
+    p_loo = np.poly1d(coef_loo)
+
+    # Estimación
+    Z_estimado = p_loo(f[idx])
+
+    # Valor real
+    Z_real = Z[idx]
+
+    # Error relativo
+    error_rel = abs((Z_real - Z_estimado) / Z_real) * 100
+
+    # Guardar resultados
+    resultados.append([
+        f[idx],
+        Z_real,
+        Z_estimado,
+        error_rel
+    ])
+
+# =========================
+# TABLA
+# =========================
+
+tabla = pd.DataFrame(resultados,
+                     columns=[
+                         "Frecuencia (Hz)",
+                         "Valor real",
+                         "Valor estimado",
+                         "Error relativo (%)"
+                     ])
+
+print("\nVALIDACIÓN LEAVE-ONE-OUT\n")
+print(tabla)
+
+# =========================
+# ERROR PROMEDIO
+# =========================
+
+error_promedio = tabla["Error relativo (%)"].mean()
+
+print(f"\nError relativo promedio = {error_promedio:.4f}%")
+
+# =========================
+# MOSTRAR TABLA GRÁFICAMENTE
+# =========================
+
+fig, ax = plt.subplots(figsize=(10,4))
+
+ax.axis('off')
+
+tabla_grafica = ax.table(
+    cellText=np.round(tabla.values, 4),
+    colLabels=tabla.columns,
+    loc='center'
+)
+
+tabla_grafica.auto_set_font_size(False)
+tabla_grafica.set_fontsize(10)
+tabla_grafica.scale(1.2, 1.5)
+
+# Mostrar valor interpolado
+plt.text(
+    0.02, 0.95,
+    f'Valor interpolado en 1000 Hz = {Z_interp:.4f} ohm',
+    fontsize=11,
+    transform=ax.transAxes
+)
+
+plt.title("Resultados de Validación Leave-One-Out",
+          fontsize=12,
+          pad=20)
+
+plt.show()
