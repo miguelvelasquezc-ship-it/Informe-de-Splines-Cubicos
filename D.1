@@ -1,0 +1,112 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import CubicSpline
+
+# =========================
+# DATOS
+# =========================
+
+f = np.array([
+    100,120,145,170,200,235,270,310,355,405,
+    460,520,585,655,730,810,895,985,1080,1180,
+    1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
+], dtype=float)
+
+Z = np.array([
+    152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
+    132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
+    135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
+], dtype=float)
+
+# =========================
+# UMBRAL
+# =========================
+
+Z_th = 150
+
+# =========================
+# SPLINE CÚBICO
+# =========================
+
+spline = CubicSpline(f, Z, bc_type='natural')
+
+# =========================
+# MALLA FINA
+# =========================
+
+x = np.linspace(min(f), max(f), 5000)
+
+y = spline(x)
+
+# Función desplazada
+y_shift = y - Z_th
+
+# =========================
+# BÚSQUEDA DE RAÍCES
+# =========================
+
+indices = np.where(np.diff(np.sign(y_shift)))[0]
+
+raices = []
+
+for i in indices:
+
+    x1 = x[i]
+    x2 = x[i+1]
+
+    # Interpolación lineal local
+    raiz = x1 - y_shift[i]*(x2 - x1)/(y_shift[i+1] - y_shift[i])
+
+    raices.append(raiz)
+
+# =========================
+# GRÁFICA
+# =========================
+
+plt.figure(figsize=(10,6))
+
+plt.plot(x, y,
+         linewidth=2,
+         label='Spline cúbico')
+
+plt.scatter(f, Z,
+            color='red',
+            zorder=3,
+            label='Datos experimentales')
+
+plt.axhline(Z_th,
+            color='black',
+            linestyle='--',
+            label='Z_th = 150 ohm')
+
+# Marcar raíces
+for r in raices:
+
+    plt.scatter(r, Z_th,
+                color='green',
+                s=80,
+                zorder=5)
+
+    plt.text(r + 20, Z_th + 0.5,
+             f'{r:.4f} Hz',
+             fontsize=9)
+
+plt.xlabel('Frecuencia (Hz)')
+plt.ylabel('|Z| (ohm)')
+
+plt.title('Raíces de |Z|(f) - Z_th')
+
+plt.grid(True)
+plt.legend()
+
+plt.show()
+
+# =========================
+# RESULTADOS
+# =========================
+
+print("Raíces encontradas:\n")
+
+for i, r in enumerate(raices, start=1):
+
+    print(f"Raíz {i}: f = {r:.4f} Hz")
