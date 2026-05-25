@@ -1,103 +1,114 @@
+#librerias instaladas numpy, matplotlib, scipy
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install scipy"
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-# =========================
-# DATOS
-# =========================
 
+#frecuencias experimentales en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# =========================
-# SPLINE CÚBICO NATURAL
-# =========================
 
+#spline cubico natural
+
+#crea el spline cubico usando condiciones naturales
 spline = CubicSpline(f, Z, bc_type='natural')
 
-# =========================
-# DERIVADA DEL SPLINE
-# =========================
+#derivada del spline
 
-# Derivada analítica del spline
+#obtiene la derivada analitica del spline cubico
 spline_derivada = spline.derivative()
 
-# Evaluar derivada en los puntos originales
+#evalua la derivada en los puntos experimentales originales
 dZ_df = spline_derivada(f)
 
-# =========================
-# MALLA FINA
-# =========================
 
+#malla fina para visualizar la derivada
+
+#genera muchos puntos para obtener una curva suave
 x = np.linspace(min(f), max(f), 2000)
-
+#evalua la derivada del spline en la malla fina
 y_derivada = spline_derivada(x)
 
-# =========================
-# UBICACIÓN DEL MÍNIMO
-# =========================
 
-# Raíces de la derivada
+#ubicacion del minimo
+
+#calcula las raices de la derivada
 raices = spline_derivada.roots()
 
-# Elegir raíz dentro del intervalo
+#selecciona las raices que estan dentro del intervalo experimental
 raices_validas = raices[
     (raices >= min(f)) & (raices <= max(f))
 ]
-
-# Frecuencia del mínimo
+#obtiene la frecuencia aproximada donde ocurre el minimo
 f_min = raices_validas[0]
-
-# Valor mínimo
+#calcula el valor minimo de impedancia usando el spline
 Z_min = spline(f_min)
 
-# =========================
-# GRÁFICA
-# =========================
 
+#grafica de la derivada
+
+#crea la figura principal
 plt.figure(figsize=(10,6))
 
-plt.plot(x, y_derivada,
-         linewidth=2,
-         label=r'$\frac{d|Z|}{df}$')
+#grafica la derivada continua del spline
+plt.plot(
+    x,
+    y_derivada,
+    linewidth=2,
+    label=r'$\frac{d|Z|}{df}$'
+)
 
-plt.axhline(0,
-            color='black',
-            linestyle='--')
+#dibuja una linea horizontal en cero
+plt.axhline(
+    0,
+    color='black',
+    linestyle='--'
+)
 
-plt.axvline(f_min,
-            color='red',
-            linestyle='--',
-            label=f'Mínimo ≈ {f_min:.4f} Hz')
+#dibuja una linea vertical en la frecuencia del minimo
+plt.axvline(
+    f_min,
+    color='red',
+    linestyle='--',
+    label=f'Mínimo ≈ {f_min:.4f} Hz'
+)
 
-plt.scatter(f, dZ_df,
-            color='red',
-            zorder=3,
-            label='Derivada en datos')
+#grafica los valores de la derivada en los puntos experimentales
+plt.scatter(
+    f,
+    dZ_df,
+    color='red',
+    zorder=3,
+    label='Derivada en datos'
+)
 
+#etiqueta del eje horizontal
 plt.xlabel('Frecuencia (Hz)')
+#etiqueta del eje vertical
 plt.ylabel(r'$\frac{d|Z|}{df}$')
-
+#titulo principal de la grafica
 plt.title('Derivada del spline cúbico natural')
 
+#activa la cuadricula
 plt.grid(True)
+#muestra la leyenda
 plt.legend()
-
+#muestra la grafica final
 plt.show()
 
-# =========================
-# RESULTADOS
-# =========================
-
+#imprime la frecuencia aproximada donde ocurre el minimo
 print(f"Frecuencia aproximada del mínimo = {f_min:.4f} Hz")
-
+#imprime el valor minimo aproximado de la impedancia
 print(f"Valor mínimo aproximado de |Z| = {Z_min:.4f} ohm")
