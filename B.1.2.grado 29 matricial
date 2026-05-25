@@ -1,66 +1,73 @@
+#librerias instaladas numpy, matplotlib
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib"
 import numpy as np
 import matplotlib.pyplot as plt
 
-# DATOS
+
+#frecuencias experimentales en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# POLINOMIO GRADO 29
+#define el grado del polinomio de interpolacion
 grado = 29
 
-# Ajuste/interpolación polinómica
+#calcula los coeficientes del polinomio mediante ajuste matricial
 coef = np.polyfit(f, Z, grado)
 
-# Crear función polinómica
+#crea la funcion polinomica usando los coeficientes obtenidos
 p = np.poly1d(coef)
 
-# =========================
-# EVALUACIÓN
-# =========================
-
+#genera muchos puntos para visualizar mejor las oscilaciones
 x = np.linspace(min(f), max(f), 2000)
-
+#evalua el polinomio en cada punto generado
 y = p(x)
 
-# =========================
-# GRÁFICA
-# =========================
 
+#crea la figura de la grafica
 plt.figure(figsize=(10,6))
 
-plt.scatter(f, Z,
-            color='red',
-            label='Datos experimentales')
+#grafica los datos experimentales originales
+plt.scatter(
+    f,
+    Z,
+    color='red',
+    label='Datos experimentales'
+)
 
-plt.plot(x, y,
-         linewidth=2,
-         label='Polinomio grado 29')
+#grafica la curva del polinomio de grado 29
+plt.plot(
+    x,
+    y,
+    linewidth=2,
+    label='Polinomio grado 29'
+)
 
+#etiqueta del eje horizontal
 plt.xlabel('Frecuencia (Hz)')
+#etiqueta del eje vertical
 plt.ylabel('|Z| (ohm)')
-
+#titulo principal de la grafica
 plt.title('Método Matricial - Grado 29')
 
+#activa la cuadricula
 plt.grid(True)
+#muestra la leyenda
 plt.legend()
-
+#muestra la grafica
 plt.show()
 
-# =========================
-# INTERPOLACIÓN
-# =========================
 
+#frecuencia 
 f_interp = 1500
-
 valor = p(f_interp)
-
 print(f"Valor interpolado en {f_interp} Hz = {valor:.4f} ohm")
