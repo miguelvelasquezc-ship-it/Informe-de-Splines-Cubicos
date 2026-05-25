@@ -1,0 +1,134 @@
+#librerias instaladas numpy, matplotlib
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib"
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+#frecuencias experimentales en hz
+f = np.array([
+    100,120,145,170,200,235,270,310,355,405,
+    460,520,585,655,730,810,895,985,1080,1180,
+    1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
+], dtype=float)
+
+#impedancias medidas en ohmios
+Z = np.array([
+    152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
+    132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
+    135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
+], dtype=float)
+
+
+#malla fina para graficar los polinomios
+
+#genera muchos puntos para obtener curvas suaves
+x = np.linspace(min(f), max(f), 3000)
+
+#polinomio de grado 5
+
+#calcula los coeficientes del polinomio grado 5
+coef5 = np.polyfit(f, Z, 5)
+
+#crea la funcion polinomica
+p5 = np.poly1d(coef5)
+
+#evalua el polinomio en la malla fina
+y5 = p5(x)
+
+
+#polinomio de grado 10
+
+#calcula los coeficientes del polinomio grado 10
+coef10 = np.polyfit(f, Z, 10)
+
+#crea la funcion polinomica
+p10 = np.poly1d(coef10)
+
+#evalua el polinomio en la malla fina
+y10 = p10(x)
+
+#polinomio de grado 15
+
+#calcula los coeficientes del polinomio grado 15
+coef15 = np.polyfit(f, Z, 15)
+
+#crea la funcion polinomica
+p15 = np.poly1d(coef15)
+
+#evalua el polinomio en la malla fina
+y15 = p15(x)
+
+#polinomio de grado 29
+
+#calcula los coeficientes del polinomio grado 29
+coef29 = np.polyfit(f, Z, 29)
+
+#crea la funcion polinomica
+p29 = np.poly1d(coef29)
+
+#evalua el polinomio en la malla fina
+y29 = p29(x)
+#grafica principal
+#crea la figura de la grafica
+plt.figure(figsize=(12,7))
+
+
+#grafica los datos experimentales originales
+plt.scatter(
+    f,
+    Z,
+    color='black',
+    label='Datos experimentales',
+    zorder=5
+)
+
+#grafica el polinomio de grado 5
+plt.plot(
+    x,
+    y5,
+    linewidth=2,
+    label='Grado 5'
+)
+
+#grafica el polinomio de grado 10
+plt.plot(
+    x,
+    y10,
+    linewidth=2,
+    label='Grado 10'
+)
+
+#grafica el polinomio de grado 15
+plt.plot(
+    x,
+    y15,
+    linewidth=2,
+    label='Grado 15'
+)
+
+#grafica el polinomio de grado 29
+plt.plot(
+    x,
+    y29,
+    linewidth=2,
+    label='Grado 29'
+)
+
+#etiqueta del eje horizontal
+plt.xlabel('Frecuencia (Hz)')
+#etiqueta del eje vertical
+plt.ylabel('|Z| (ohm)')
+
+#titulo principal de la grafica
+plt.title('Comparación de Polinomios de Interpolación')
+
+#activa la cuadricula
+plt.grid(True)
+#muestra la leyenda
+plt.legend()
+
+#ajusta el rango vertical para centrar visualmente el polinomio grado 10
+plt.ylim(min(y10) - 5, max(y10) + 5)
+
+#muestra la grafica final
+plt.show()
