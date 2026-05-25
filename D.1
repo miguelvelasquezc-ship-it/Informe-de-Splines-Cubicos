@@ -1,112 +1,141 @@
+#librerias instaladas numpy, matplotlib, scipy
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install scipy"
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-# =========================
-# DATOS
-# =========================
 
+#frecuencias experimentales en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# =========================
-# UMBRAL
-# =========================
 
+#valor umbral de impedancia
 Z_th = 150
 
-# =========================
-# SPLINE CÚBICO
-# =========================
+#spline cubico
 
+#crea el spline cubico natural
 spline = CubicSpline(f, Z, bc_type='natural')
 
-# =========================
-# MALLA FINA
-# =========================
+#malla fina para evaluar la curva
 
+#genera muchos puntos para obtener una curva suave
 x = np.linspace(min(f), max(f), 5000)
 
+#evalua el spline en la malla
 y = spline(x)
 
-# Función desplazada
+
+#funcion desplazada
+
+#desplaza la funcion respecto al valor umbral
 y_shift = y - Z_th
 
-# =========================
-# BÚSQUEDA DE RAÍCES
-# =========================
+#busqueda de raices
 
+#detecta cambios de signo para localizar cruces con el umbral
 indices = np.where(np.diff(np.sign(y_shift)))[0]
-
+#lista donde se almacenaran las raices encontradas
 raices = []
 
+
+#recorre cada intervalo donde existe cambio de signo
 for i in indices:
 
+    #extremo izquierdo del intervalo
     x1 = x[i]
+
+    #extremo derecho del intervalo
     x2 = x[i+1]
 
-    # Interpolación lineal local
-    raiz = x1 - y_shift[i]*(x2 - x1)/(y_shift[i+1] - y_shift[i])
+    #calcula la raiz usando interpolacion lineal local
+    raiz = x1 - y_shift[i] * (x2 - x1) / (y_shift[i+1] - y_shift[i])
 
+    #guarda la raiz encontrada
     raices.append(raiz)
 
-# =========================
-# GRÁFICA
-# =========================
 
+#grafica principal
+
+#crea la figura de la grafica
 plt.figure(figsize=(10,6))
 
-plt.plot(x, y,
-         linewidth=2,
-         label='Spline cúbico')
+#grafica la curva spline cubica
+plt.plot(
+    x,
+    y,
+    linewidth=2,
+    label='Spline cúbico'
+)
 
-plt.scatter(f, Z,
-            color='red',
-            zorder=3,
-            label='Datos experimentales')
+#grafica los datos experimentales originales
+plt.scatter(
+    f,
+    Z,
+    color='red',
+    zorder=3,
+    label='Datos experimentales'
+)
 
-plt.axhline(Z_th,
-            color='black',
-            linestyle='--',
-            label='Z_th = 150 ohm')
+#dibuja la linea horizontal del valor umbral
+plt.axhline(
+    Z_th,
+    color='black',
+    linestyle='--',
+    label='Z_th = 150 ohm'
+)
 
-# Marcar raíces
+#marca las raices encontradas sobre la grafica
 for r in raices:
 
-    plt.scatter(r, Z_th,
-                color='green',
-                s=80,
-                zorder=5)
+    #marca cada raiz con un punto verde
+    plt.scatter(
+        r,
+        Z_th,
+        color='green',
+        s=80,
+        zorder=5
+    )
 
-    plt.text(r + 20, Z_th + 0.5,
-             f'{r:.4f} Hz',
-             fontsize=9)
+    #agrega el valor de frecuencia junto a cada raiz
+    plt.text(
+        r + 20,
+        Z_th + 0.5,
+        f'{r:.4f} Hz',
+        fontsize=9
+    )
 
+#etiqueta del eje horizontal
 plt.xlabel('Frecuencia (Hz)')
+#etiqueta del eje vertical
 plt.ylabel('|Z| (ohm)')
-
+#titulo principal de la grafica
 plt.title('Raíces de |Z|(f) - Z_th')
 
-plt.grid(True)
-plt.legend()
 
+#activa la cuadricula
+plt.grid(True)
+#muestra la leyenda
+plt.legend()
+#muestra la grafica final
 plt.show()
 
-# =========================
-# RESULTADOS
-# =========================
 
+#imprime encabezado de resultados
 print("Raíces encontradas:\n")
 
+#imprime cada raiz encontrada
 for i, r in enumerate(raices, start=1):
 
     print(f"Raíz {i}: f = {r:.4f} Hz")
