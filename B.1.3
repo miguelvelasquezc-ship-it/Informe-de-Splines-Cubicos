@@ -1,73 +1,74 @@
+#librerias instaladas numpy, matplotlib, pandas
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install pandas"
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# =========================
-# DATOS
-# =========================
 
+#frecuencias experimentales en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# =========================
-# POLINOMIO GRADO 10
-# =========================
-
+#define el grado del polinomio de interpolacion
 grado = 10
 
+#calcula los coeficientes del polinomio usando ajuste matricial
 coef = np.polyfit(f, Z, grado)
-
+#crea la funcion polinomica a partir de los coeficientes
 p = np.poly1d(coef)
 
-# =========================
-# INTERPOLACIÓN EN 1000 Hz
-# =========================
 
+#frecuencia donde se desea calcular la interpolacion
 f_interp = 1000
-
+#evalua el polinomio en la frecuencia indicada
 Z_interp = p(f_interp)
-
+#imprime el valor interpolado
 print(f"\nValor interpolado en 1000 Hz = {Z_interp:.4f} ohm")
 
-# =========================
-# VALIDACIÓN LOO
-# =========================
 
+#validacion leave one out
+
+#fija una semilla para obtener resultados reproducibles
 np.random.seed(1)
-
+#selecciona aleatoriamente 5 indices para validacion
 indices_loo = np.random.choice(len(f), 5, replace=False)
-
+#lista donde se almacenaran los resultados
 resultados = []
 
+
+#recorre cada indice seleccionado
 for idx in indices_loo:
 
-    # Eliminar punto
+    #elimina un punto de los datos originales
     f_train = np.delete(f, idx)
     Z_train = np.delete(Z, idx)
 
-    # Nuevo polinomio
+    #calcula un nuevo polinomio sin el punto eliminado
     coef_loo = np.polyfit(f_train, Z_train, grado)
+
+    #crea el nuevo polinomio
     p_loo = np.poly1d(coef_loo)
 
-    # Estimación
+    #estima el valor de impedancia en el punto eliminado
     Z_estimado = p_loo(f[idx])
 
-    # Valor real
+    #obtiene el valor real del punto eliminado
     Z_real = Z[idx]
 
-    # Error relativo
+    #calcula el error relativo porcentual
     error_rel = abs((Z_real - Z_estimado) / Z_real) * 100
 
-    # Guardar resultados
+    #guarda los resultados en una lista
     resultados.append([
         f[idx],
         Z_real,
@@ -75,37 +76,36 @@ for idx in indices_loo:
         error_rel
     ])
 
-# =========================
-# TABLA
-# =========================
+#crea una tabla con los resultados de validacion
+tabla = pd.DataFrame(
+    resultados,
+    columns=[
+        "Frecuencia (Hz)",
+        "Valor real",
+        "Valor estimado",
+        "Error relativo (%)"
+    ]
+)
 
-tabla = pd.DataFrame(resultados,
-                     columns=[
-                         "Frecuencia (Hz)",
-                         "Valor real",
-                         "Valor estimado",
-                         "Error relativo (%)"
-                     ])
-
+#imprime validacion
 print("\nVALIDACIÓN LEAVE-ONE-OUT\n")
+#muestra la tabla en consola
 print(tabla)
 
-# =========================
-# ERROR PROMEDIO
-# =========================
 
+#calcula el error relativo promedio
 error_promedio = tabla["Error relativo (%)"].mean()
-
+#imprime el error promedio
 print(f"\nError relativo promedio = {error_promedio:.4f}%")
 
-# =========================
-# MOSTRAR TABLA GRÁFICAMENTE
-# =========================
 
+#crea una figura para mostrar la tabla graficamente
 fig, ax = plt.subplots(figsize=(10,4))
-
+#oculta los ejes de la figura
 ax.axis('off')
 
+
+#crea la tabla grafica
 tabla_grafica = ax.table(
     cellText=np.round(tabla.values, 4),
     colLabels=tabla.columns,
@@ -116,16 +116,21 @@ tabla_grafica.auto_set_font_size(False)
 tabla_grafica.set_fontsize(10)
 tabla_grafica.scale(1.2, 1.5)
 
-# Mostrar valor interpolado
+
+#muestra el valor interpolado dentro de la figura
 plt.text(
-    0.02, 0.95,
+    0.02,
+    0.95,
     f'Valor interpolado en 1000 Hz = {Z_interp:.4f} ohm',
     fontsize=11,
     transform=ax.transAxes
 )
 
-plt.title("Resultados de Validación Leave-One-Out",
-          fontsize=12,
-          pad=20)
-
+#titulo principal de la figura
+plt.title(
+    "Resultados de Validación Leave-One-Out",
+    fontsize=12,
+    pad=20
+)
+#muestra la figura final
 plt.show()
