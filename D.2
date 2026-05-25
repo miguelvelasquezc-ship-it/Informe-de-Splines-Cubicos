@@ -1,114 +1,150 @@
+#librerias instaladas numpy, matplotlib, scipy
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install scipy"
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-# =========================
-# DATOS
-# =========================
 
+#datos experimentales
+
+#frecuencias en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# =========================
-# SPLINE CÚBICO
-# =========================
+#spline cubico
 
+#crea el spline cubico natural
 spline = CubicSpline(f, Z, bc_type='natural')
 
-# Función:
-# g(f) = |Z|(f) - 150
+#funcion objetivo
 
+#valor umbral de impedancia
 Z_th = 150
 
+#define la funcion desplazada
+#g(f) = |Z|(f) - 150
 def g(x):
     return spline(x) - Z_th
 
-# Derivada para Newton
+#derivada para newton raphson
+
+#obtiene la derivada del spline
 g_der = spline.derivative()
 
-# ==================================================
-# MÉTODO DE BISECCIÓN
-# ==================================================
+#metodo de biseccion
 
+#intervalo inicial donde existe cambio de signo
 a = 100
 b = 200
 
+#tolerancia del metodo
 tol = 1e-6
+
+#numero maximo de iteraciones
 max_iter = 100
 
+#ejecuta el algoritmo de biseccion
 for i in range(max_iter):
 
+    #calcula el punto medio del intervalo
     c = (a + b) / 2
 
+    #verifica si se alcanzo la tolerancia deseada
     if abs(g(c)) < tol:
         break
 
+    #selecciona el nuevo subintervalo
     if g(a) * g(c) < 0:
         b = c
     else:
         a = c
 
+#guarda la raiz encontrada
 raiz_biseccion = c
 
-# ==================================================
-# MÉTODO DE NEWTON-RAPHSON
-# ==================================================
+#metodo de newton raphson
 
-x0 = 130   # aproximación inicial cercana
+#valor inicial cercano a la raiz
+x0 = 130
 
+#ejecuta el algoritmo de newton raphson
 for i in range(max_iter):
 
-    x1 = x0 - g(x0)/g_der(x0)
+    #calcula la siguiente aproximacion
+    x1 = x0 - g(x0) / g_der(x0)
 
+    #verifica convergencia
     if abs(x1 - x0) < tol:
         break
 
+    #actualiza el valor para la siguiente iteracion
     x0 = x1
 
+#guarda la raiz encontrada
 raiz_newton = x1
 
-# =========================
-# GRÁFICA
-# =========================
 
+#malla fina para la grafica
+
+#genera muchos puntos para visualizar la curva
 x = np.linspace(min(f), max(f), 2000)
 
+#evalua el spline en la malla
 y = spline(x)
 
+#grafica principal
+
+#crea la figura de la grafica
 plt.figure(figsize=(10,6))
 
-plt.plot(x, y,
-         linewidth=2,
-         label='Spline cúbico')
+#grafica la curva spline cubica
+plt.plot(
+    x,
+    y,
+    linewidth=2,
+    label='Spline cúbico'
+)
 
-plt.axhline(Z_th,
-            color='black',
-            linestyle='--',
-            label='Z_th = 150 ohm')
+#dibuja la linea horizontal del umbral
+plt.axhline(
+    Z_th,
+    color='black',
+    linestyle='--',
+    label='Z_th = 150 ohm'
+)
 
-# Raíces
-plt.scatter(raiz_biseccion, Z_th,
-            color='red',
-            s=80,
-            label='Bisección')
+#marca la raiz obtenida por biseccion
+plt.scatter(
+    raiz_biseccion,
+    Z_th,
+    color='red',
+    s=80,
+    label='Bisección'
+)
 
-plt.scatter(raiz_newton, Z_th,
-            color='green',
-            s=80,
-            label='Newton-Raphson')
+#marca la raiz obtenida por newton raphson
+plt.scatter(
+    raiz_newton,
+    Z_th,
+    color='green',
+    s=80,
+    label='Newton-Raphson'
+)
 
-# Texto
+#agrega informacion numerica dentro de la grafica
 plt.text(
-    0.02, 0.92,
+    0.02,
+    0.92,
     f'Bisección = {raiz_biseccion:.6f} Hz\n'
     f'Newton = {raiz_newton:.6f} Hz',
     transform=plt.gca().transAxes,
@@ -116,20 +152,23 @@ plt.text(
     bbox=dict(facecolor='white', alpha=0.8)
 )
 
+#etiqueta del eje horizontal
 plt.xlabel('Frecuencia (Hz)')
+#etiqueta del eje vertical
 plt.ylabel('|Z| (ohm)')
-
+#titulo principal de la grafica
 plt.title('Comparación de métodos de búsqueda de raíces')
 
-plt.grid(True)
-plt.legend()
 
+#activa la cuadricula
+plt.grid(True)
+#muestra la leyenda
+plt.legend()
+#muestra la grafica final
 plt.show()
 
-# =========================
-# RESULTADOS
-# =========================
 
+#imprime la raiz calculada por biseccion
 print(f"Raíz por bisección = {raiz_biseccion:.6f} Hz")
-
+#imprime la raiz calculada por newton raphson
 print(f"Raíz por Newton-Raphson = {raiz_newton:.6f} Hz")
