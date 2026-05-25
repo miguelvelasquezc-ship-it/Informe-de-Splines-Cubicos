@@ -1,24 +1,38 @@
-#Codigo en lenguaje Python
-#Librerias instaladas numpy, matplotlib y scipy
-#En la ventana CMD ejecutar: "pip install numpy" , "pip install matplotlib" y "pip install scipy"
+#librerias instaladas numpy, matplotlib, scipy
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install scipy"
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-#Datos
+
+#datos originales
+
+#vector de coordenadas en x
 x = np.array([2, 3, 4])
+
+#vector de coordenadas en y
 y = np.array([5, 10, 6])
 
-#Construccion del spline cúbico
+#construccion del spline cubico
+
+#crea el spline cubico natural que interpola los datos
 spline = CubicSpline(x, y, bc_type='natural')
 
-#Intervalos para cada tramo
+#intervalos para cada tramo
+
+#genera puntos para el primer intervalo entre 2 y 3
 x0 = np.linspace(2, 3, 200)
+
+#genera puntos para el segundo intervalo entre 3 y 4
 x1 = np.linspace(3, 4, 200)
 
-#Grafica de cada spline
+#grafica principal
+
+#crea la figura de la grafica
 plt.figure(figsize=(12,7))
 
+
+#grafica el primer tramo del spline cubico
 plt.plot(
     x0,
     spline(x0),
@@ -27,6 +41,8 @@ plt.plot(
     label=r'$S_0(x)=5+7.25(x-2)-2.25(x-2)^3$'
 )
 
+
+#grafica el segundo tramo del spline cubico
 plt.plot(
     x1,
     spline(x1),
@@ -35,7 +51,8 @@ plt.plot(
     label=r'$S_1(x)=10+0.5(x-3)-6.75(x-3)^2+2.25(x-3)^3$'
 )
 
-#Puntos originales
+
+#grafica los puntos originales
 plt.scatter(
     x,
     y,
@@ -45,15 +62,30 @@ plt.scatter(
     label='Datos originales'
 )
 
-#Etiquetas de puntos
-for xi, yi in zip(x, y):
-    plt.text(xi, yi -0.2, f'({xi},{yi})', fontsize=9)
 
+#agrega etiquetas a cada punto experimental
+for xi, yi in zip(x, y):
+
+    plt.text(
+        xi,
+        yi - 0.2,
+        f'({xi},{yi})',
+        fontsize=9
+    )
+
+
+#titulo principal de la grafica
 plt.title('Interpolación por Splines Cúbicos')
+
+#etiqueta del eje horizontal
 plt.xlabel('x')
+
+#etiqueta del eje vertical
 plt.ylabel('y')
 
+#activa la cuadricula
 plt.grid(True)
+#muestra la leyenda
 plt.legend(fontsize=8)
-
+#muestra la grafica final
 plt.show()
