@@ -1,30 +1,33 @@
-#Librerias instaladas numpy, matplotlib
-#En la ventana CMD ejecutar: "pip install numpy" , "pip install matplotlib"
+#librerias instaladas numpy, matplotlib
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib"
 import numpy as np
 import matplotlib.pyplot as plt
 
-#Datos experimentales
+
+#frecuencias medidas en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ])
 
+#valores de impedancia 
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ])
 
-#Encontrar minimo aproximado
+#encuentra el indice donde la impedancia es minima
 indice_min = np.argmin(Z)
-
+#obtiene la frecuencia correspondiente al valor minimo
 f_min = f[indice_min]
+#obtiene el valor minimo de impedancia
 Z_min = Z[indice_min]
 
-#Grafica
+#crea la figura y define el tamaño de la ventana
 plt.figure(figsize=(11,6))
-
+#grafica impedancia en funcion de la frecuencia
 plt.plot(
     f,
     Z,
@@ -34,7 +37,7 @@ plt.plot(
     label='|Z|(f)'
 )
 
-#Punto minimo
+#marca el punto minimo con color rojo
 plt.scatter(
     f_min,
     Z_min,
@@ -44,19 +47,24 @@ plt.scatter(
     label=f'Punto minimo'
 )
 
-#Etiqueta del minimo
+#agrega un texto indicando el punto minimo encontrado
 plt.text(
     f_min + 50,
     Z_min + 0.5,
     f'Mínimo\n({f_min} Hz, {Z_min} Ω)',
     fontsize=10
 )
-#Texto para los ejes y el titulo
+
+#titulo principal de la grafica
 plt.title('Impedancia vs Frecuencia')
+#etiqueta del eje horizontal
 plt.xlabel('Frecuencia f (Hz)')
+#etiqueta del eje vertical
 plt.ylabel('|Z| (Ohm)')
 
+#activa la cuadricula
 plt.grid(True)
+#muestra la leyenda de la grafica
 plt.legend()
-
+#muestra la ventana con la grafica
 plt.show()
