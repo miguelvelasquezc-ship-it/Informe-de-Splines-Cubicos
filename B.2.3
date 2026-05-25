@@ -1,67 +1,66 @@
+#librerias instaladas numpy, matplotlib, scipy, pandas
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install scipy" , "pip install pandas"
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-# =========================
-# DATOS
-# =========================
 
+#frecuencias experimentales en hz
 f = np.array([
     100,120,145,170,200,235,270,310,355,405,
     460,520,585,655,730,810,895,985,1080,1180,
     1290,1410,1540,1680,1830,1990,2160,2340,2530,2730
 ], dtype=float)
 
+#impedancias medidas en ohmios
 Z = np.array([
     152.3,149.1,146.8,144.9,142.0,139.5,137.9,136.1,134.8,133.6,
     132.7,131.9,131.4,131.1,130.9,131.0,131.3,131.9,132.7,133.8,
     135.2,136.9,138.9,141.1,143.5,146.1,149.0,152.2,155.6,159.2
 ], dtype=float)
 
-# =========================
-# POLINOMIO GRADO 10
-# =========================
 
+#polinomio grado 10
+
+#calcula los coeficientes del polinomio de grado 10
 coef = np.polyfit(f, Z, 10)
 
+#crea la funcion polinomica a partir de los coeficientes
 p = np.poly1d(coef)
 
-# =========================
-# SPLINE CÚBICO NATURAL
-# =========================
+#spline cubico natural
 
+#crea el spline cubico usando condiciones naturales
 spline = CubicSpline(f, Z, bc_type='natural')
 
-# =========================
-# EVALUAR EN 1000 Hz
-# =========================
+#evaluacion en 1000 hz
 
+#frecuencia donde se desea interpolar
 f_interp = 1000
 
+#calcula el valor interpolado usando polinomio
 Z_polinomio = p(f_interp)
 
+#calcula el valor interpolado usando spline cubico
 Z_spline = spline(f_interp)
 
-# =========================
-# DATOS PARA TABLA
-# =========================
-
+#crea los nombres de las columnas de la tabla
 columnas = ["Método", "|Z|(1000 Hz) [ohm]"]
 
+#crea los datos que se mostraran en la tabla
 datos = [
     ["Polinomio grado 10", f"{Z_polinomio:.4f}"],
     ["Spline cúbico natural", f"{Z_spline:.4f}"]
 ]
 
-# =========================
-# MOSTRAR TABLA
-# =========================
 
+#crea la figura donde se mostrara la tabla
 fig, ax = plt.subplots(figsize=(6,2.5))
-
+#oculta los ejes de la figura
 ax.axis('off')
 
+#crea la tabla visual
 tabla = ax.table(
     cellText=datos,
     colLabels=columnas,
@@ -72,6 +71,8 @@ tabla.auto_set_font_size(False)
 tabla.set_fontsize(10)
 tabla.scale(1.2, 1.5)
 
+#titulo principal de la figura
 plt.title("Comparación de métodos en 1000 Hz")
 
+#muestra la tabla final
 plt.show()
