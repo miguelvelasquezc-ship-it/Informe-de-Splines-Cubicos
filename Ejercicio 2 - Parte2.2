@@ -1,0 +1,55 @@
+#librerias instaladas numpy, matplotlib, pandas
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install pandas"
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+#datos de frecuencia en khz
+f = np.array([10.0, 12.5, 15.0])
+
+#datos de voltaje
+V = np.array([0.842, 0.911, 0.986])
+
+#paso entre datos consecutivos en khz
+h = 2.5
+
+#diferencia progresiva de orden 2
+
+#calcula la derivada numerica usando puntos hacia adelante
+dV_df = (-3*V[0] + 4*V[1] - V[2]) / (2*h)
+
+
+
+#creacion de tabla de resultados
+
+#organiza los resultados en una tabla
+tabla = pd.DataFrame({
+    "Frecuencia (kHz)": [10.0],
+    "dV/df (V/kHz)": [f"{dV_df:.6f}"]
+})
+
+
+#tabla grafica
+
+#crea la figura y los ejes
+fig, ax = plt.subplots(figsize=(6,2.5))
+
+#oculta los ejes para mostrar solo la tabla
+ax.axis('off')
+
+#crea la tabla visual
+tabla_grafica = ax.table(
+    cellText=tabla.values,
+    colLabels=tabla.columns,
+    cellLoc='center',
+    loc='center'
+)
+
+tabla_grafica.auto_set_font_size(False)
+tabla_grafica.set_fontsize(11)
+tabla_grafica.scale(1.2, 2)
+
+
+plt.title("Diferencia Progresiva de Orden 2")
+plt.show()
