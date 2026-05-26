@@ -1,0 +1,146 @@
+#librerias instaladas numpy, matplotlib, pandas
+#en la ventana cmd ejecutar: "pip install numpy" , "pip install matplotlib" , "pip install pandas"
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+#datos de frecuencia en khz
+f = np.array([
+    10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,
+    35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,
+    60.0,62.5,65.0,67.5,70.0,72.5,75.0,77.5,80.0,82.5,
+    85.0,87.5,90.0,92.5,95.0,97.5,100.0,102.5,105.0,107.5
+])
+
+#datos de voltaje
+V = np.array([
+    0.842,0.911,0.986,1.062,1.143,1.227,1.314,1.401,1.482,1.551,
+    1.216,1.048,0.866,0.689,0.521,0.364,0.223,0.103,0.012,-0.041,
+    -0.057,-0.034,0.018,0.096,0.197,0.318,0.452,0.579,0.700,0.809,
+    0.611,0.688,0.756,0.811,0.856,0.894,0.926,0.954,0.980,1.004
+])
+
+#datos de impedancia en ohmios
+Z = np.array([
+    182.4,178.9,175.1,171.0,166.8,162.7,158.9,155.4,152.0,149.0,
+    146.1,145.2,145.8,147.3,149.9,153.5,158.0,163.2,168.9,174.8,
+    180.5,186.2,191.5,196.2,200.1,203.1,205.2,206.3,206.1,204.7,
+    198.0,194.4,190.9,187.8,185.1,183.0,181.6,180.8,180.6,180.9
+])
+
+#funcion de lagrange de segundo grado
+
+#calcula el polinomio interpolador de lagrange
+def lagrange_segundo_grado(x, x_datos, y_datos):
+
+    #cantidad de puntos
+    n = len(x_datos)
+
+    #variable acumuladora del resultado
+    resultado = 0
+
+    #recorre cada termino del polinomio
+    for i in range(n):
+
+        #inicializa el termino correspondiente
+        termino = y_datos[i]
+
+        #calcula el producto de lagrange
+        for j in range(n):
+
+            #evita dividir entre cero
+            if i != j:
+
+                termino *= (x - x_datos[j]) / (x_datos[i] - x_datos[j])
+
+        #suma el termino al resultado final
+        resultado += termino
+
+    return resultado
+
+
+#interpolacion de v en 41 khz
+
+#puntos cercanos utilizados
+x1 = np.array([37.5, 40.0, 42.5])
+
+#valores de voltaje correspondientes
+y1 = np.array([1.048, 0.866, 0.689])
+
+#calcula el valor interpolado
+V_41 = lagrange_segundo_grado(41.0, x1, y1)
+
+#interpolacion de z en 41 khz
+
+#valores de impedancia correspondientes
+y2 = np.array([145.2, 145.8, 147.3])
+
+#calcula el valor interpolado
+Z_41 = lagrange_segundo_grado(41.0, x1, y2)
+
+#interpolacion de v en 73 khz
+
+#puntos cercanos utilizados
+x3 = np.array([70.0, 72.5, 75.0])
+
+#valores de voltaje correspondientes
+y3 = np.array([0.197, 0.318, 0.452])
+
+#calcula el valor interpolado
+V_73 = lagrange_segundo_grado(73.0, x3, y3)
+
+#interpolacion de z en 73 khz
+
+#valores de impedancia correspondientes
+y4 = np.array([200.1, 203.1, 205.2])
+
+#calcula el valor interpolado
+Z_73 = lagrange_segundo_grado(73.0, x3, y4)
+
+#creacion de tabla de resultados
+
+#organiza los resultados en una tabla
+tabla = pd.DataFrame({
+    "Magnitud": [
+        "V(41.0 kHz)",
+        "|Z|(41.0 kHz)",
+        "V(73.0 kHz)",
+        "|Z|(73.0 kHz)"
+    ],
+    "Valor Aproximado": [
+        f"{V_41:.4f} V",
+        f"{Z_41:.4f} Ω",
+        f"{V_73:.4f} V",
+        f"{Z_73:.4f} Ω"
+    ]
+})
+
+
+#grafica de la tabla
+#crea la figura y los ejes
+fig, ax = plt.subplots(figsize=(8, 3))
+#oculta los ejes para mostrar solo la tabla
+ax.axis('off')
+
+
+#crea la tabla visual
+tabla_grafica = ax.table(
+    cellText=tabla.values,
+    colLabels=tabla.columns,
+    cellLoc='center',
+    loc='center'
+)
+
+tabla_grafica.auto_set_font_size(False)
+tabla_grafica.set_fontsize(11)
+tabla_grafica.scale(1.2, 2)
+
+#titulo principal
+plt.title(
+    "Resultados de Interpolación de Lagrange",
+    fontsize=13,
+    pad=15
+)
+
+plt.show()
